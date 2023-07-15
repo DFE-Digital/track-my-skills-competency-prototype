@@ -1,0 +1,71 @@
+{% extends "layouts/auth.html" %}
+
+{% set selectedNav = "My profile" %}
+{% set pageName = "Change your role" %}
+
+{% block beforeContent %}
+<a href="/profile" class="govuk-back-link">Back</a>
+{% endblock %}
+
+{% block content %}
+
+    <div class="govuk-grid-row">
+        <div class="govuk-grid-column-two-thirds">
+            <h1 class="govuk-heading-xl">Change your role</h1>
+
+            <form method="post" action="/profile/change-role">
+
+<div class="govuk-form-group">
+  <fieldset class="govuk-fieldset">
+    <legend class="govuk-fieldset__legend">
+      What is your role?
+    </legend>
+    <div class="govuk-radios" data-module="govuk-radios">
+      <div class="govuk-radios__item">
+        <input class="govuk-radios__input" id="role" name="role" type="radio" value="EA" {% if user.Role === 'Content Designer'%}checked{%endif%} >
+        <label class="govuk-label govuk-radios__label" for="role">
+          Content Designer
+        </label>
+      </div>
+      <div class="govuk-radios__item">
+        <input class="govuk-radios__input" id="role-2" name="role" type="radio" value="HEO" {% if user.Role === 'Interaction Designer'%}checked{%endif%} >
+        <label class="govuk-label govuk-radios__label" for="role-2">
+          Interaction Designer
+        </label>
+      </div>
+      <div class="govuk-radios__item">
+        <input class="govuk-radios__input" id="role-3" name="role" type="radio" value="SEO" {% if user.Role === 'Service Designer'%}checked{%endif%} >
+        <label class="govuk-label govuk-radios__label" for="role-3">
+          Service Designer
+        </label>
+      </div>
+      <div class="govuk-radios__item">
+        <input class="govuk-radios__input" id="role-4" name="role" type="radio" value="G7" {% if user.Role === 'Head of Design (Profession)'%}checked{%endif%} >
+        <label class="govuk-label govuk-radios__label" for="role-4">
+          Head of Design (Profession)
+        </label>
+      </div>
+      <div class="govuk-radios__item">
+        <input class="govuk-radios__input" id="role-5" name="role" type="radio" value="G6 Lead" {% if user.Role === 'Head of Content (Profession)'%}checked{%endif%} >
+        <label class="govuk-label govuk-radios__label" for="role-5">
+          Head of Content (Profession)
+        </label>
+      </div>
+      
+    </div>
+  </fieldset>
+</div>
+               
+<div class="govuk-button-group">
+  <button class="govuk-button" data-module="govuk-button">
+    Save
+  </button>
+  <a class="govuk-link" href="/profile">Cancel and return to profile</a>
+</div>
+
+            </form>
+
+        </div>
+    </div>
+
+{% endblock %}

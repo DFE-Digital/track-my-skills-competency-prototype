@@ -1,0 +1,191 @@
+{% extends "layouts/auth.html" %}
+
+{% set selectedNav = "My skills" %}
+{% set pageName = "My skills" %}
+
+{% block hero%}
+    <div class="masthead">
+        <div class="dfe-width-container">
+
+            <h1 class="govuk-heading-xl govuk-!-margin-top-3 govuk-!-margin-bottom-3 govuk-!-font-size-36 ">
+                My skills
+            </h1>
+            <p class="govuk-body govuk-body-l">
+                <strong>Current role</strong>
+                {{user.Role}} - {{user.Grade}}</p>
+        </div>
+    </div>
+
+    {% endblock%}
+
+    {% block content %}
+
+        <div class="govuk-grid-row">
+            <div class="govuk-grid-column-one-quarter">
+                <nav class="dfe-vertical-nav">
+
+                    <ul class="dfe-vertical-nav__section">
+                        {% for role in framework %}
+                            <li class="dfe-vertical-nav__section-item {% if roleSkill.fields.SkillID === role.fields.SkillID%}dfe-vertical-nav__section-item--current{% endif %}">
+                                <a class="dfe-vertical-nav__link" href="/skills/{{role.fields.SkillID}}">{{role.fields.Name}}</a>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </nav>
+            </div>
+
+            <div class="govuk-grid-column-three-quarters">
+            
+
+                <h2 class="govuk-heading-l">{{roleSkill.fields.Name}}</h2>
+                <div class="panel">
+                    <span class="govuk-caption-s">Expected for grade {{user.Grade}}</span>
+                    <h3 class="govuk-heading-s govuk-!-margin-bottom-0">{{roleSkill.fields.Display}}</h3>
+                    <p class="govuk-body">{%markdown%}{{roleSkill.fields.Skills}}
+                        {%endmarkdown%}</p>
+
+                    {% if nextGrade %}
+                        <details class="govuk-details" data-module="govuk-details">
+                            <summary class="govuk-details__summary">
+                                <span class="govuk-details__summary-text">
+      Expectations for this skill at {{nextGrade}}
+                                </span>
+                            </summary>
+                            <div class="govuk-details__text">
+
+                         
+
+                              {% for skill in nextFramework%}
+
+                              {% if skill.fields.Name === roleSkill.fields.Name%}
+
+                                <h3 class="govuk-heading-s govuk-!-margin-bottom-0">{{skill.fields.Display}}</h3>
+                                <p class="govuk-body">{%markdown%}{{skill.fields.Skills}}
+                                    {%endmarkdown%}</p>
+                                    {% endif %}
+                                    {% endfor %}
+                            </div>
+                        </details>
+
+                    {% endif %}
+
+                </div>
+
+                <div class="panel">
+
+                    <div class="panel-white">
+                        <form action="/save-current" method="post">
+                            <input type="hidden" name="skillid" value="{{roleSkill.fields.SkillID}}">
+                            <div class="govuk-form-group">
+                                <fieldset class="govuk-fieldset">
+                                    <legend class="govuk-fieldset__legend">
+                                        <h3 class="govuk-heading-s govuk-!-margin-bottom-0">
+        Your current level 
+      </h3>
+
+                                    </legend>
+                                    <div class="govuk-radios govuk-radios--small govuk-radios--inline" data-module="govuk-radios">
+                                        <div class="govuk-radios__item">
+                                            <input class="govuk-radios__input" id="currentlevel" name="currentlevel" type="radio" value="Awareness" {% if userSkill.fields.CurrentLevel === 'Awareness' %}checked{% endif%}>
+                                            <label class="govuk-label govuk-radios__label" for="currentlevel">
+          Awareness
+        </label>
+                                        </div>
+                                        <div class="govuk-radios__item">
+                                            <input class="govuk-radios__input" id="currentlevel-2" name="currentlevel" type="radio" value="Working"{% if userSkill.fields.CurrentLevel === 'Working' %}checked{% endif%}>
+                                            <label class="govuk-label govuk-radios__label" for="currentlevel-2">
+          Working
+        </label>
+                                        </div>
+                                        <div class="govuk-radios__item">
+                                            <input class="govuk-radios__input" id="currentlevel-3" name="currentlevel" type="radio" value="Practitioner"{% if userSkill.fields.CurrentLevel === 'Practitioner' %}checked{% endif%}>
+                                            <label class="govuk-label govuk-radios__label" for="currentlevel-3">
+          Practitioner
+        </label>
+                                        </div>
+                                        <div class="govuk-radios__item">
+                                            <input class="govuk-radios__input" id="currentlevel-4" name="currentlevel" type="radio" value="Expert"{% if userSkill.fields.CurrentLevel === 'Expert' %}checked{% endif%}>
+                                            <label class="govuk-label govuk-radios__label" for="currentlevel-4">
+          Expert
+        </label>
+                                        </div>
+                                    </div>
+                                </fieldset>
+                            </div>
+
+                            <div class="govuk-form-group">
+                                <label class="govuk-label" for="comments">
+    Comments
+  </label>
+                                <textarea class="govuk-textarea" id="comments" name="comments" rows="5">{{userSkill.fields.Comments}}</textarea>
+                            </div>
+
+                            <button class="govuk-button" data-module="govuk-button">
+  Save
+</button>
+                        </form>
+                    </div>
+
+                </div>
+
+                <div class="panel">
+
+                    <div class="panel-white">
+
+                        <h3 class="govuk-heading-s">My plan</h3>
+
+                        <p class="govuk-body">Adding items to your plan means you can then set timeframes for developing this skill and update your progress.</p>
+                        <p class="govuk-body">You'll be able to manage actions in your plan from the My plan menu.</p>
+                        <form action="/add-plan" method="post">
+                            <input type="hidden" name="actionskillid" value="{{roleSkill.fields.SkillID}}">
+                            <div class="govuk-form-group">
+                                <label class="govuk-label" for="action">What action do you want to add</label>
+                                <textarea class="govuk-textarea" id="action" name="action" rows="5"></textarea>
+                            </div>
+
+                            <button class="govuk-button" data-module="govuk-button">Add to plan</button>
+                        </form>
+
+                        {% if plan %}
+
+                            <details class="govuk-details " data-module="govuk-details">
+                                <summary class="govuk-details__summary">
+                                    <span class="govuk-details__summary-text">
+      Previously added actions for this skill
+    </span>
+                                </summary>
+                                <div class="govuk-details__text">
+
+                                    <p>View and manage these actions in your <a href="/plan">action plan</a> section.</p>
+
+                                    <table class="govuk-table">
+                                        <thead class="govuk-table__head">
+                                            <tr class="govuk-table__row">
+                                                <th scope="col" class="govuk-table__header">Date added</th>
+                                                <th scope="col" class="govuk-table__header">Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="govuk-table__body">
+                                            {% for action in plan %}
+
+                                                <tr class="govuk-table__row">
+                                                    <th scope="row" class="govuk-table__header govuk-!-width-one-third">{{ action.fields.Created | date('D MMM YYYY') }}</th>
+                                                    <td class="govuk-table__cell">{{action.fields.Plan}}</td>
+                                                </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+
+                                </div>
+                            </details>
+
+                        {% endif %}
+
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+
+    {% endblock %}

@@ -1829,3 +1829,19 @@ code {
   margin-bottom: 20px;
   border-top: 2px solid $color_dfe-blue;
 }
+
+.masthead{background: $color_dfe-grey-5; margin-top:0px; padding: 20px 0px;}
+
+.panel{
+  background: $color_dfe-grey-5;
+  padding: 20px 20px 20px 20px;
+  margin-bottom: 20px;
+  border-radius: 8px;
+}
+
+.panel-white{
+  background: $color_dfe-white;
+  padding: 20px 20px 10px 20px;
+  margin-bottom: 0px;
+  border-radius: 4px;
+}

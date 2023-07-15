@@ -1,0 +1,44 @@
+{% extends "layouts/auth.html" %}
+
+{% set selectedNav = "My profile" %}
+{% set pageName = "Change your name" %}
+
+{% block beforeContent %}
+<a href="/profile" class="govuk-back-link">Back</a>
+{% endblock %}
+
+{% block content %}
+
+    <div class="govuk-grid-row">
+        <div class="govuk-grid-column-two-thirds">
+            <h1 class="govuk-heading-xl">Change your name</h1>
+
+            <form method="post" action="/profile/change-name">
+
+                <div class="govuk-form-group">
+                    <label class="govuk-label" for="first-name">
+    First name
+  </label>
+                    <input class="govuk-input" id="first-name" name="first-name" type="text" spellcheck="false" autocomplete="first-name" value="{{user.FirstName}}">
+                </div>
+
+                                <div class="govuk-form-group">
+                    <label class="govuk-label" for="last-name">
+    Last name
+  </label>
+                    <input class="govuk-input" id="last-name" name="last-name" type="text" spellcheck="false" autocomplete="last-name"  value="{{user.LastName}}">
+                </div>
+
+<div class="govuk-button-group">
+  <button class="govuk-button" data-module="govuk-button">
+    Save
+  </button>
+  <a class="govuk-link" href="/profile">Cancel and return to profile</a>
+</div>
+
+            </form>
+
+        </div>
+    </div>
+
+{% endblock %}

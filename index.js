@@ -134,16 +134,164 @@ app.get('/signin/:id', async (req, res) => {
     req.session.token = records[0].get('Token');
     // Token is valid, set the session cookie and redirect to the dashboard
     res.cookie('session', token, { maxAge: 3 * 60 * 60 * 1000, httpOnly: true });
-    res.redirect('/dashboard');
+
+    const cookieValue = res.getHeader('Set-Cookie');
+    const cookieArray = cookieValue[0].split(';');
+    const sessionCookie = cookieArray.find(cookie => cookie.includes('session='));
+    const sessionId = sessionCookie.match(/session=([^;]+)/)[1];
+    req.session.token = sessionId;
 
     // Delete the token
-    await expirePreviousTokens(records[0].get('Email'))
+    await expirePreviousTokens(records[0].get('Email'))    
+    
+    res.redirect('/dashboard');
   }
 });
 
 app.get('/dashboard', authenticate, (req, res) => {
   res.render('auth-views/dashboard/index');
 });
+
+app.get('/skills', authenticate, async (req, res) => {
+  const user = await getUserData(req.session.email !== undefined || process.env.email);
+
+  const framework = await getRoleSkillsView(user.Role + " " + user.Grade);
+  const userSkill = await getUserSkillsAll(user.Email );
+  res.render('auth-views/skills/overview', {user, framework, userSkill});
+});
+
+app.get('/skills/:id', authenticate, async (req, res) => {
+  const user = await getUserData(req.session.email !== undefined || process.env.email);
+
+  var skillID = req.params.id;
+
+  var nextGrade = "";
+
+  if (user.Grade === "EA") {
+    nextGrade = "HEO";
+  }
+
+  if (user.Grade === "HEO") {
+    nextGrade = "SEO";
+  }
+
+  if (user.Grade === "SEO") {
+    nextGrade = "G7";
+  }
+
+  if (user.Grade === "G7") {
+    nextGrade = "G6 Lead";
+  }
+
+  if (user.Grade === "G6 Lead") {
+    nextGrade = "G6 HoP";
+  }
+
+  const framework = await getRoleSkillsView(user.Role + " " + user.Grade);
+  const roleSkill = await getRoleSkillBySkillIDX(skillID);
+  const nextFramework = await getRoleSkillsView(user.Role + " " + nextGrade);
+  const userSkill = await getUserSkills(user.Email, skillID );
+
+  const plan = await getPlans(user.Email, skillID );
+
+  res.render('auth-views/skills/index', {user, framework, nextFramework, nextGrade, userSkill, plan, roleSkill});
+});
+
+app.get('/plan', authenticate, (req, res) => {
+  res.render('auth-views/plan/index');
+});
+
+app.get('/profile', authenticate, async (req, res) => {
+  const user = await getUserData(req.session.email !== undefined || process.env.email);
+  res.render('auth-views/profile/index', {user});
+});
+
+app.get('/profile/name', authenticate, async (req, res) => {
+  const user = await getUserData(req.session.email !== undefined || process.env.email);
+  res.render('auth-views/profile/name', {user});
+});
+
+app.get('/profile/grade', authenticate, async (req, res) => {
+  const user = await getUserData(req.session.email !== undefined || process.env.email);
+  res.render('auth-views/profile/grade', {user});
+});
+
+app.get('/profile/role', authenticate, async (req, res) => {
+  const user = await getUserData(req.session.email !== undefined || process.env.email);
+  res.render('auth-views/profile/role', {user});
+});
+
+app.post('/save-current', authenticate, async (req, res) => {
+  const user = await getUserData(req.session.email !== undefined || process.env.email);
+  const framework = await getRoleSkillBySkillID(req.body.skillid);
+  addUserSkill(process.env.email,  framework[0].fields.Display, req.body.currentlevel, req.body.comments, parseInt(req.body.skillid))
+  res.redirect('/skills/' + req.body.skillid);
+});
+
+app.post('/add-plan', authenticate, async (req, res) => {
+  const user = await getUserData(req.session.email !== undefined || process.env.email);
+  const framework = await getRoleSkillBySkillID(req.body.skillid);
+  addUserPlan(process.env.email, req.body.action, parseInt(req.body.actionskillid))
+  res.redirect('/skills/' + req.body.skillid);
+});
+
+async function getRoleSkillBySkillID(skillID) {
+  try {
+    const records = await base('RoleSkills')
+      .select({
+        filterByFormula: `{SkillID} = '${skillID}'`
+      })
+      .all();
+
+    // Process the retrieved records as needed
+    return records;
+  } catch (error) {
+    // Handle error
+    console.error('Error retrieving role skills from Airtable:', error);
+    throw error;
+  }
+}
+
+async function getRoleSkillBySkillIDX(skillID) {
+  try {
+    const records = await base('RoleSkills')
+      .select({
+        filterByFormula: `{SkillID} = '${skillID}'`,
+        maxRecords: 1
+      })
+      .firstPage();
+
+    if (records.length > 0) {
+      const userSkill = records[0];
+      // Process the userSkill record as needed
+      return userSkill;
+    } else {
+      return null; // No matching record found
+    }
+  } catch (error) {
+    // Handle error
+    console.error('Error retrieving user skill from Airtable:', error);
+    throw error;
+  }
+}
+
+
+
+
+async function getRoleSkillsView(viewName) {
+  try {
+    const records = await base('RoleSkills')
+      .select({
+        view: viewName
+      })
+      .all();
+
+    return records;
+  } catch (error) {
+    console.error('Error retrieving view from Airtable:', error);
+    return null;
+  }
+}
 
 // Sign out route
 app.get('/sign-out', (req, res) => {
@@ -154,12 +302,17 @@ app.get('/sign-out', (req, res) => {
 });
 
 function authenticate(req, res, next) {
-  if (req.session && req.session.email) {
-    // User is authenticated, proceed to the next middleware or route handler
+  if (config.env === 'development') {
     next();
-  } else {
-    // User is not authenticated, redirect to the sign-in page or display an error
-    res.redirect('/sign-in');
+  }
+  else {
+    if (req.session && req.session.email) {
+      // User is authenticated, proceed to the next middleware or route handler
+      next();
+    } else {
+      // User is not authenticated, redirect to the sign-in page or display an error
+      res.redirect('/sign-in');
+    }
   }
 }
 app.get(/\.html?$/i, function (req, res) {
@@ -227,6 +380,41 @@ matchRoutes = function (req, res, next) {
   renderPath(path, res, next)
 }
 
+async function addUserSkill(email, expectedLevel, currentLevel, comments, skillID) {
+  try {
+    const newRecord = await base('UserSkill').create({
+      Email: email,
+      ExpectedLevel: expectedLevel,
+      CurrentLevel: currentLevel,
+      Comments: comments,
+      SkillID: skillID
+    });
+
+    // Process the new record as needed
+    return newRecord;
+  } catch (error) {
+    // Handle error
+    console.error('Error adding user skill to Airtable:', error);
+    throw error;
+  }
+}
+
+async function addUserPlan(email, plan, skillID) {
+  try {
+    const newRecord = await base('Plans').create({
+      Email: email,
+      Plan: plan,
+      SkillID: skillID
+    });
+
+    // Process the new record as needed
+    return newRecord;
+  } catch (error) {
+    // Handle error
+    console.error('Error adding user plan to Airtable:', error);
+    throw error;
+  }
+}
 
 function generateToken(length) {
   const tokenLength = Math.ceil(length / 2);
@@ -258,14 +446,94 @@ async function expirePreviousTokens(email) {
 // Utility function to send the magic link email
 function sendMagicLinkEmail(token) {
   notify
-  .sendEmail(process.env.magiclinkemailtemplateid, 'andy.jones@education.gov.uk', {
+    .sendEmail(process.env.magiclinkemailtemplateid, 'andy.jones@education.gov.uk', {
       personalisation: {
         token: token
       },
-  })
-  .then((response) => {return true})
-  .catch((err) => console.log(err))
+    })
+    .then((response) => { return true })
+    .catch((err) => console.log(err))
 }
+
+async function getUserData(email) {
+  try {
+    const records = await base('Users').select({
+      filterByFormula: `{Email} = '${email}'`,
+      maxRecords: 1
+    }).firstPage();
+
+    if (records.length === 1) {
+      const userData = records[0].fields;
+      return userData;
+    } else {
+      // User not found
+      return null;
+    }
+  } catch (error) {
+    // Handle error
+    console.error('Error retrieving user data:', error);
+    throw error;
+  }
+}
+
+async function getUserSkillsAll(email) {
+  try {
+    const records = await base('UserSkill').select({
+      filterByFormula: `{Email} = '${email}'`,
+      sort: [{ field: 'Created', direction: 'desc' }]
+    }).firstPage();
+
+    if (records.length > 0) {
+      return records;
+    } else {
+      return null; // No matching records found
+    }
+  } catch (error) {
+    // Handle error
+    console.error('Error retrieving user skills:', error);
+    throw error;
+  }
+}
+
+async function getUserSkills(email, skillID) {
+  try {
+    const records = await base('UserSkill').select({
+      filterByFormula: `AND({Email} = '${email}', {SkillID} = '${skillID}')`,
+      sort: [{ field: 'Created', direction: 'desc' }],
+      maxRecords: 1
+    }).firstPage();
+
+    if (records.length > 0) {
+      return records[0];
+    } else {
+      return null; // No matching records found
+    }
+  } catch (error) {
+    // Handle error
+    console.error('Error retrieving user skills:', error);
+    throw error;
+  }
+}
+
+async function getPlans(email, skillID) {
+  try {
+    const records = await base('Plans').select({
+      filterByFormula: `AND({Email} = '${email}', {SkillID} = '${skillID}')`,
+      sort: [{ field: 'Created', direction: 'desc' }]
+    }).firstPage();
+
+    if (records.length > 0) {
+      return records;
+    } else {
+      return null; // No matching records found
+    }
+  } catch (error) {
+    // Handle error
+    console.error('Error retrieving user skills:', error);
+    throw error;
+  }
+}
+
 
 
 

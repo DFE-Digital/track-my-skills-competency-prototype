@@ -1,0 +1,75 @@
+{% extends "layouts/auth.html" %}
+
+{% set selectedNav = "My skills" %}
+{% set pageName = "My skills" %}
+
+{% block hero%}
+    <div class="masthead">
+        <div class="dfe-width-container">
+
+            <h1 class="govuk-heading-xl govuk-!-margin-top-3 govuk-!-margin-bottom-3 govuk-!-font-size-36 ">
+                My skills
+            </h1>
+            <p class="govuk-body govuk-body-l">
+                <strong>Current role</strong>
+                {{user.Role}} - {{user.Grade}}</p>
+        </div>
+    </div>
+
+    {% endblock%}
+
+    {% block content %}
+
+        <div class="govuk-grid-row">
+            <div class="govuk-grid-column-full">
+
+                <table class="govuk-table">
+                    <thead class="govuk-table__head">
+                        <tr class="govuk-table__row">
+                            <th scope="col" class="govuk-table__header  govuk-!-width-one-half">Skill</th>
+                            <th scope="col" class="govuk-table__header">Expected</th>
+                            <th scope="col" class="govuk-table__header">Current</th>
+                        </tr>
+                    </thead>
+                    <tbody class="govuk-table__body">
+                        {% for role in framework %}
+                            <tr class="govuk-table__row">
+                                <th scope="row" class="govuk-table__header">{{ role.fields.Name }}</th>
+                                <td class="govuk-table__cell">
+                                    <strong class="{% if role.fields.Display === 'Awareness'%}govuk-tag {% else%}govuk-tag govuk-tag--grey{% endif %}">A</strong>
+                                    <strong class="{% if role.fields.Display === 'Working'%}govuk-tag {% else%}govuk-tag govuk-tag--grey{% endif %}">W</strong>
+                                    <strong class="{% if role.fields.Display === 'Practitioner'%}govuk-tag {% else%}govuk-tag govuk-tag--grey{% endif %}">P</strong>
+                                    <strong class="{% if role.fields.Display === 'Expert'%}govuk-tag {% else%}govuk-tag govuk-tag--grey{% endif %}">E</strong>
+                                </td>
+                                <td class="govuk-table__cell">
+                                    {% set levelAdded = false %}
+                                    {% for skill in userSkill %}
+                                        {% if skill.fields.SkillID == role.fields.SkillID %}
+                                            {% if not levelAdded %}
+                                                <strong class="{% if skill.fields.CurrentLevel === 'Awareness'%}govuk-tag {% else%}govuk-tag govuk-tag--grey{% endif %}">A</strong>
+                                                <strong class="{% if skill.fields.CurrentLevel === 'Working'%}govuk-tag {% else%}govuk-tag govuk-tag--grey{% endif %}">W</strong>
+                                                <strong class="{% if skill.fields.CurrentLevel === 'Practitioner'%}govuk-tag {% else%}govuk-tag govuk-tag--grey{% endif %}">P</strong>
+                                                <strong class="{% if skill.fields.CurrentLevel === 'Expert'%}govuk-tag {% else%}govuk-tag govuk-tag--grey{% endif %}">E</strong>
+                                                {% set levelAdded = true %}
+                                            {% endif %}
+
+                                        {% endif %}
+
+                                    {% endfor %}
+                                    {% if levelAdded == false %}
+                                        <strong class="{% if skill.fields.CurrentLevel === 'Awareness'%}govuk-tag {% else%}govuk-tag govuk-tag--grey{% endif %}">A</strong>  
+            <strong class="{% if skill.fields.CurrentLevel === 'Working'%}govuk-tag {% else%}govuk-tag govuk-tag--grey{% endif %}">W</strong>  
+            <strong class="{% if skill.fields.CurrentLevel === 'Practitioner'%}govuk-tag {% else%}govuk-tag govuk-tag--grey{% endif %}">P</strong>  
+            <strong class="{% if skill.fields.CurrentLevel === 'Expert'%}govuk-tag {% else%}govuk-tag govuk-tag--grey{% endif %}">E</strong>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    </div>
+
+{% endblock %}
