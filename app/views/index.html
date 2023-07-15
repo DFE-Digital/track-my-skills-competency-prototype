@@ -1,0 +1,52 @@
+{% extends "layouts/homepage.html" %}
+
+{% set selectedNav = "Home" %}
+{% set pageName = "Homepage" %}
+
+{% block content %}
+
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+      <h1 class="govuk-heading-xl">Track my skills and competency</h1>
+    </div>
+    <div class="govuk-grid-column-two-thirds">
+      <p class="govuk-body">Use this service to help you to understand and track how you are doing against the Digital, Data and Technology (DDaT) Profession Capability Framework.</p>
+
+      <p class="govuk-body">You can use this service to:</p>
+
+      <ul class="govuk-list govuk-list--bullet">
+        <li>understand the skills and competencies required for your current role</li>
+        <li>track your progress against any development needs</li>
+        <li>identify what you need to develop for progressing to your next role</li>
+        <li>if you are considering another design profession, what skills and competencies are needed</li>
+      </ul>
+
+      <p class="govuk-body">You can use this service if you have an education.gov.uk email address.</p>
+
+      <a href="/sign-in" role="button" draggable="false" class="govuk-button govuk-button--start" data-module="govuk-button">
+  Sign in
+  <svg class="govuk-button__start-icon" xmlns="http://www.w3.org/2000/svg" width="17.5" height="19" viewBox="0 0 33 40" aria-hidden="true" focusable="false">
+          <path fill="currentColor" d="M0 0h13l20 20-20 20H0l20-20z"/>
+        </svg>
+      </a>
+
+    </div>
+
+    <div class="govuk-grid-column-one-third">
+      <aside class="govuk-related-navigation">
+
+        <h2 class="govuk-heading-m">Related content</h2>
+
+        <ul class="govuk-list govuk-list--spaced">
+          <li>
+            <a href="https://www.gov.uk/government/collections/digital-data-and-technology-profession-capability-framework" target="_blank" rel="noopner noreferrer">Digital, Data and Technology Profession Capability Framework</a>
+          </li>
+          <li>
+            <a href="https://www.gov.uk/guidance/skill-levels-for-digital-data-and-technology-roles"  target="_blank" rel="noopner noreferrer">Skill levels for digital, data and technology roles</a>
+          </li>
+        </ul>
+      </aside>
+    </div>
+  </div>
+
+{% endblock %}

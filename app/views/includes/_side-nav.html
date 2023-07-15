@@ -1,0 +1,50 @@
+
+{% set styles_section = [
+  {
+    title: "Styles",
+    url: "/styles"
+  },
+   {
+    title: "Colour",
+    url: "/styles/colour"
+  }
+] %}
+
+
+{% set components_section = [
+  {
+    title: "Components",
+    url: "/components"
+  }
+] %}
+
+
+<nav class="dfe-vertical-nav">
+
+  {%- if selectedNav === "Styles" %}
+
+    <ul class="dfe-vertical-nav__section">
+      {% for item in styles_section %}
+        <li class="dfe-vertical-nav__section-item {% if item.title === pageName  or setSelectedSideNav === item.title %}dfe-vertical-nav__section-item--current{% endif %}">
+          <a class="dfe-vertical-nav__link" href="{{ item.url }}">{{ item.title }}</a>
+        </li>
+      {% endfor %}
+    </ul>
+   
+  {% endif %}
+
+
+  {%- if selectedNav === "Components" %}
+
+    <ul class="dfe-vertical-nav__section">
+      {% for item in components_section %}
+        <li class="dfe-vertical-nav__section-item {% if item.title === pageName  or setSelectedSideNav === item.title %}dfe-vertical-nav__section-item--current{% endif %}">
+          <a class="dfe-vertical-nav__link" href="{{ item.url }}">{{ item.title }}</a>
+        </li>
+      {% endfor %}
+    </ul>
+   
+  {% endif %}
+
+
+</nav>
