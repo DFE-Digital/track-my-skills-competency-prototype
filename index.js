@@ -94,7 +94,7 @@ app.post('/submit', express.urlencoded({ extended: false }), async (req, res) =>
 
 
     // Send the magic link email
-    await sendMagicLinkEmail(email, token);
+    await sendMagicLinkEmail(token);
 
     res.redirect('/check-email/index')
   } else {
@@ -109,7 +109,7 @@ app.post('/submit', express.urlencoded({ extended: false }), async (req, res) =>
     await base('Tokens').create({ Email: email, Token: token, ExpiryDate: expiryDate });
 
     // Send the magic link email
-    await sendMagicLinkEmail(email, token);
+    await sendMagicLinkEmail(token);
 
     res.redirect('/check-email/index')
   }
