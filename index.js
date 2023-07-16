@@ -130,10 +130,14 @@ app.get('/signin/:id', async (req, res) => {
     // Token is invalid or expired
     res.render('invalid-link')
   } else {
+
+    // Token is valid, set the session cookie and redirect to the dashboard
+    res.cookie('session', token, { maxAge: 3 * 60 * 60 * 1000});
+
+    await wait(500);
+
     req.session.email = records[0].get('Email');
     req.session.token = records[0].get('Token');
-    // Token is valid, set the session cookie and redirect to the dashboard
-    res.cookie('session', token, { maxAge: 3 * 60 * 60 * 1000, httpOnly: true });
 
     // Delete the token
     await expirePreviousTokens(records[0].get('Email'))
@@ -144,13 +148,19 @@ app.get('/signin/:id', async (req, res) => {
 
 app.get('/overview', authenticate, async (req, res) => {
 
-  const user = await getUserData(req.session.email !== undefined || process.env.email);
+  const user = await getUserData(req.session.email);
 
   res.render('auth-views/overview/index', { user });
 });
 
 app.get('/skills', authenticate, async (req, res) => {
-  const user = await getUserData(req.session.email !== undefined || process.env.email);
+
+  console.log(req.session.email)
+
+  const user = await getUserData(req.session.email);
+
+
+  console.log(user)
 
   const framework = await getRoleSkillsView(user.Role + " " + user.Grade);
   const userSkill = await getUserSkillsAll(user.Email);
@@ -159,7 +169,7 @@ app.get('/skills', authenticate, async (req, res) => {
 });
 
 app.get('/skills/:id', authenticate, async (req, res) => {
-  const user = await getUserData(req.session.email !== undefined || process.env.email);
+  const user = await getUserData(req.session.email);
 
   var skillID = req.params.id;
 
@@ -197,34 +207,34 @@ app.get('/skills/:id', authenticate, async (req, res) => {
 
 app.get('/plan', authenticate, async (req, res) => {
 
-  const user = await getUserData(req.session.email !== undefined || process.env.email);
+  const user = await getUserData(req.session.email);
   const framework = await getRoleSkillsView(user.Role + " " + user.Grade);
   const userPlans = await getUserPlan(user.Email);
   const userSkills = await getUserSkillsAll(user.Email);
-const actions = await getUserPlanActions(user.Email);
+  const actions = await getUserPlanActions(user.Email);
 
-  res.render('auth-views/plan/index',{user, framework, userPlans, userSkills, actions});
+  res.render('auth-views/plan/index', { user, framework, userPlans, userSkills, actions });
 });
 
 app.get('/profile', authenticate, async (req, res) => {
-  const user = await getUserData(req.session.email !== undefined || process.env.email);
+    const user = await getUserData(req.session.email);
   res.render('auth-views/profile/index', { user });
 });
 
 app.get('/profile/name', authenticate, async (req, res) => {
-  const user = await getUserData(req.session.email !== undefined || process.env.email);
+    const user = await getUserData(req.session.email);
   var updated = req.query.u;
   res.render('auth-views/profile/name', { user, updated });
 });
 
 app.get('/profile/grade', authenticate, async (req, res) => {
-  const user = await getUserData(req.session.email !== undefined || process.env.email);
+    const user = await getUserData(req.session.email);
   var updated = req.query.u;
   res.render('auth-views/profile/grade', { user, updated });
 });
 
 app.get('/profile/role', authenticate, async (req, res) => {
-  const user = await getUserData(req.session.email !== undefined || process.env.email);
+    const user = await getUserData(req.session.email);
   var updated = req.query.u;
   res.render('auth-views/profile/role', { user, updated });
 });
@@ -309,14 +319,14 @@ async function updateRole(userId, role) {
 
 
 app.post('/save-current', authenticate, async (req, res) => {
-  const user = await getUserData(req.session.email !== undefined || process.env.email);
+    const user = await getUserData(req.session.email);
   const framework = await getRoleSkillBySkillID(req.body.skillid);
   addUserSkill(process.env.email, framework[0].fields.Display, req.body.currentlevel, req.body.comments, parseInt(req.body.skillid))
   res.redirect('/skills/' + req.body.skillid);
 });
 
 app.post('/add-plan', authenticate, async (req, res) => {
-  const user = await getUserData(req.session.email !== undefined || process.env.email);
+    const user = await getUserData(req.session.email);
   const framework = await getRoleSkillBySkillID(req.body.actionskillid);
   addUserPlan(process.env.email, req.body.action, parseInt(req.body.actionskillid))
   res.redirect('/skills/' + req.body.actionskillid);
@@ -367,7 +377,7 @@ async function getUserPlan(email) {
     const records = await base('Plans')
       .select({
         filterByFormula: `{Email} = '${email}'`,
-      sort: [{ field: 'SkillID', direction: 'asc' }]
+        sort: [{ field: 'SkillID', direction: 'asc' }]
       })
       .all();
 
@@ -390,7 +400,7 @@ async function getUserPlanActions(email) {
     const records = await base('PlanActions')
       .select({
         filterByFormula: `{Plans} = '${email}'`,
-      sort: [{ field: 'Created', direction: 'desc' }]
+        sort: [{ field: 'Created', direction: 'desc' }]
       })
       .all();
 
