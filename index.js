@@ -135,12 +135,6 @@ app.get('/signin/:id', async (req, res) => {
     // Token is valid, set the session cookie and redirect to the dashboard
     res.cookie('session', token, { maxAge: 3 * 60 * 60 * 1000, httpOnly: true });
 
-    const cookieValue = res.getHeader('Set-Cookie');
-    const cookieArray = cookieValue[0].split(';');
-    const sessionCookie = cookieArray.find(cookie => cookie.includes('session='));
-    const sessionId = sessionCookie.match(/session=([^;]+)/)[1];
-    req.session.token = sessionId;
-
     // Delete the token
     await expirePreviousTokens(records[0].get('Email'))
 
