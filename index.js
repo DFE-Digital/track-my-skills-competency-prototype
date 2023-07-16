@@ -26,7 +26,7 @@ const session = require('express-session');
 app.use(session({
   secret: '0f334f786f7f2of7f2d9h347f2972497fg37f7',
   resave: false,
-  saveUninitialized: false
+  saveUninitialized: true
 }));
 
 app.use(bodyParser.json())
@@ -132,21 +132,20 @@ app.get('/signin/:id', async (req, res) => {
   } else {
 
     // Token is valid, set the session cookie and redirect to the dashboard
-    res.cookie('session', token, { maxAge: 3 * 60 * 60 * 1000});
+    res.cookie('session', token, { maxAge: 3 * 60 * 60 * 1000 });
 
     await wait(500);
 
     req.session.email = records[0].get('Email');
     req.session.token = records[0].get('Token');
 
-    // Delete the token
-    await expirePreviousTokens(records[0].get('Email'))
-
     res.redirect('/overview');
   }
 });
 
 app.get('/overview', authenticate, async (req, res) => {
+
+
 
   const user = await getUserData(req.session.email);
 
@@ -155,12 +154,8 @@ app.get('/overview', authenticate, async (req, res) => {
 
 app.get('/skills', authenticate, async (req, res) => {
 
-  console.log(req.session.email)
-
   const user = await getUserData(req.session.email);
 
-
-  console.log(user)
 
   const framework = await getRoleSkillsView(user.Role + " " + user.Grade);
   const userSkill = await getUserSkillsAll(user.Email);
@@ -217,24 +212,24 @@ app.get('/plan', authenticate, async (req, res) => {
 });
 
 app.get('/profile', authenticate, async (req, res) => {
-    const user = await getUserData(req.session.email);
+  const user = await getUserData(req.session.email);
   res.render('auth-views/profile/index', { user });
 });
 
 app.get('/profile/name', authenticate, async (req, res) => {
-    const user = await getUserData(req.session.email);
+  const user = await getUserData(req.session.email);
   var updated = req.query.u;
   res.render('auth-views/profile/name', { user, updated });
 });
 
 app.get('/profile/grade', authenticate, async (req, res) => {
-    const user = await getUserData(req.session.email);
+  const user = await getUserData(req.session.email);
   var updated = req.query.u;
   res.render('auth-views/profile/grade', { user, updated });
 });
 
 app.get('/profile/role', authenticate, async (req, res) => {
-    const user = await getUserData(req.session.email);
+  const user = await getUserData(req.session.email);
   var updated = req.query.u;
   res.render('auth-views/profile/role', { user, updated });
 });
@@ -319,16 +314,16 @@ async function updateRole(userId, role) {
 
 
 app.post('/save-current', authenticate, async (req, res) => {
-    const user = await getUserData(req.session.email);
+  const user = await getUserData(req.session.email);
   const framework = await getRoleSkillBySkillID(req.body.skillid);
-  addUserSkill(process.env.email, framework[0].fields.Display, req.body.currentlevel, req.body.comments, parseInt(req.body.skillid))
+  addUserSkill(req.session.email, framework[0].fields.Display, req.body.currentlevel, req.body.comments, parseInt(req.body.skillid))
   res.redirect('/skills/' + req.body.skillid);
 });
 
 app.post('/add-plan', authenticate, async (req, res) => {
-    const user = await getUserData(req.session.email);
+  const user = await getUserData(req.session.email);
   const framework = await getRoleSkillBySkillID(req.body.actionskillid);
-  addUserPlan(process.env.email, req.body.action, parseInt(req.body.actionskillid))
+  addUserPlan(req.session.email, req.body.action, parseInt(req.body.actionskillid))
   res.redirect('/skills/' + req.body.actionskillid);
 });
 
