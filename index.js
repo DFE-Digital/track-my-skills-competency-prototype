@@ -240,28 +240,28 @@ app.get('/profile/role', authenticate, async (req, res) => {
 });
 
 app.post('/profile/name', authenticate, async (req, res) => {
-  const user = await getAllUserData(req.session.email !== undefined || process.env.email);
+  const user = await getAllUserData(req.session.email);
   updateUserName(user.id, req.body.firstName, req.body.LastName)
   await wait(500);
   res.redirect('/profile/name?u=1');
 });
 
 app.post('/profile/grade', authenticate, async (req, res) => {
-  const user = await getAllUserData(req.session.email !== undefined || process.env.email);
+  const user = await getAllUserData(req.session.email);
   updateGrade(user.id, req.body.grade)
   await wait(500);
   res.redirect('/profile/grade?u=1');
 });
 
 app.post('/profile/role', authenticate, async (req, res) => {
-  const user = await getAllUserData(req.session.email !== undefined || process.env.email);
+  const user = await getAllUserData(req.session.email);
   updateRole(user.id, req.body.role)
   await wait(500);
   res.redirect('/profile/role?u=1');
 });
 
 app.post('/plan/add-update', authenticate, async (req, res) => {
-  const user = await getAllUserData(req.session.email !== undefined || process.env.email);
+  const user = await getAllUserData(req.session.email);
   const update = req.body.actionupdate;
   const planID = req.body.planid;
 
