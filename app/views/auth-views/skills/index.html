@@ -3,22 +3,26 @@
 {% set selectedNav = "My skills" %}
 {% set pageName = "My skills" %}
 
-{% block hero%}
-    <div class="masthead">
-        <div class="dfe-width-container">
+{% block beforeContent %}
+<a href="/skills" class="govuk-back-link">Back</a>
+{% endblock %}
 
-            <h1 class="govuk-heading-xl govuk-!-margin-top-3 govuk-!-margin-bottom-3 govuk-!-font-size-36 ">
-                My skills
-            </h1>
-            <p class="govuk-body govuk-body-l">
-                <strong>Current role</strong>
-                {{user.Role}} - {{user.Grade}}</p>
+{% block content %}
+
+     <h1 class="govuk-heading-xl govuk-!-margin-bottom-3">My skills</h1>
+
+    <div class="panel govuk-!-margin-bottom-9">
+        <div class="govuk-grid-row">
+            <div class="govuk-grid-column-one-third">
+                <span class="govuk-caption-s">Current role</span>
+                <h3 class="govuk-heading-s govuk-!-margin-bottom-0">{{user.Role}}</h3>
+            </div>
+            <div class="govuk-grid-column-one-third">
+                <span class="govuk-caption-s">Current grade</span>
+                <h3 class="govuk-heading-s govuk-!-margin-bottom-0">{{user.Grade}}</h3>
+            </div>
         </div>
     </div>
-
-    {% endblock%}
-
-    {% block content %}
 
         <div class="govuk-grid-row">
             <div class="govuk-grid-column-one-quarter">

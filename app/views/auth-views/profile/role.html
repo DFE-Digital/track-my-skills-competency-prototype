@@ -11,9 +11,29 @@
 
     <div class="govuk-grid-row">
         <div class="govuk-grid-column-two-thirds">
+            {% if updated %}
+                <div class="govuk-notification-banner govuk-notification-banner--success" role="alert"
+  aria-labelledby="govuk-notification-banner-title"
+  data-module="govuk-notification-banner">
+                    <div class="govuk-notification-banner__header">
+                        <h2 class="govuk-notification-banner__title" id="govuk-notification-banner-title">
+      Success
+    </h2>
+                    </div>
+                    <div class="govuk-notification-banner__content">
+                        <h3 class="govuk-notification-banner__heading">
+      Role has been updated
+    </h3>
+                        <p class="govuk-body">
+                            <a class="govuk-notification-banner__link" href="/profile/role">Dismiss this notification</a>.</p>
+                    </div>
+                </div>
+    
+
+            {% endif %}
             <h1 class="govuk-heading-xl">Change your role</h1>
 
-            <form method="post" action="/profile/change-role">
+            <form method="post" action="/profile/role">
 
 <div class="govuk-form-group">
   <fieldset class="govuk-fieldset">
@@ -22,31 +42,31 @@
     </legend>
     <div class="govuk-radios" data-module="govuk-radios">
       <div class="govuk-radios__item">
-        <input class="govuk-radios__input" id="role" name="role" type="radio" value="EA" {% if user.Role === 'Content Designer'%}checked{%endif%} >
+        <input class="govuk-radios__input" id="role" name="role" type="radio" value="Content Designer" {% if user.Role === 'Content Designer'%}checked{%endif%} >
         <label class="govuk-label govuk-radios__label" for="role">
           Content Designer
         </label>
       </div>
       <div class="govuk-radios__item">
-        <input class="govuk-radios__input" id="role-2" name="role" type="radio" value="HEO" {% if user.Role === 'Interaction Designer'%}checked{%endif%} >
+        <input class="govuk-radios__input" id="role-2" name="role" type="radio" value="Interaction Designer" {% if user.Role === 'Interaction Designer'%}checked{%endif%} >
         <label class="govuk-label govuk-radios__label" for="role-2">
           Interaction Designer
         </label>
       </div>
       <div class="govuk-radios__item">
-        <input class="govuk-radios__input" id="role-3" name="role" type="radio" value="SEO" {% if user.Role === 'Service Designer'%}checked{%endif%} >
+        <input class="govuk-radios__input" id="role-3" name="role" type="radio" value="Service Designer" {% if user.Role === 'Service Designer'%}checked{%endif%} >
         <label class="govuk-label govuk-radios__label" for="role-3">
           Service Designer
         </label>
       </div>
       <div class="govuk-radios__item">
-        <input class="govuk-radios__input" id="role-4" name="role" type="radio" value="G7" {% if user.Role === 'Head of Design (Profession)'%}checked{%endif%} >
+        <input class="govuk-radios__input" id="role-4" name="role" type="radio" value="Head of Design (Profession)" {% if user.Role === 'Head of Design (Profession)'%}checked{%endif%} >
         <label class="govuk-label govuk-radios__label" for="role-4">
           Head of Design (Profession)
         </label>
       </div>
       <div class="govuk-radios__item">
-        <input class="govuk-radios__input" id="role-5" name="role" type="radio" value="G6 Lead" {% if user.Role === 'Head of Content (Profession)'%}checked{%endif%} >
+        <input class="govuk-radios__input" id="role-5" name="role" type="radio" value="Head of Content (Profession)" {% if user.Role === 'Head of Content (Profession)'%}checked{%endif%} >
         <label class="govuk-label govuk-radios__label" for="role-5">
           Head of Content (Profession)
         </label>

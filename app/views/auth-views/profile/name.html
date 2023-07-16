@@ -4,37 +4,56 @@
 {% set pageName = "Change your name" %}
 
 {% block beforeContent %}
-<a href="/profile" class="govuk-back-link">Back</a>
+    <a href="/profile" class="govuk-back-link">Back</a>
 {% endblock %}
 
 {% block content %}
 
     <div class="govuk-grid-row">
         <div class="govuk-grid-column-two-thirds">
-            <h1 class="govuk-heading-xl">Change your name</h1>
+            {% if updated %}
+                <div class="govuk-notification-banner govuk-notification-banner--success" role="alert"
+  aria-labelledby="govuk-notification-banner-title"
+  data-module="govuk-notification-banner">
+                    <div class="govuk-notification-banner__header">
+                        <h2 class="govuk-notification-banner__title" id="govuk-notification-banner-title">
+      Success
+    </h2>
+                    </div>
+                    <div class="govuk-notification-banner__content">
+                        <h3 class="govuk-notification-banner__heading">
+      Name has been updated
+    </h3>
+                        <p class="govuk-body">
+                            <a class="govuk-notification-banner__link" href="/profile/name">Dismiss this notification</a>.</p>
+                    </div>
+                </div>
+               
 
-            <form method="post" action="/profile/change-name">
+            {% endif %}
+ <h1 class="govuk-heading-xl">Change your name</h1>
+            <form method="post" action="/profile/name">
 
                 <div class="govuk-form-group">
-                    <label class="govuk-label" for="first-name">
+                    <label class="govuk-label" for="firstName">
     First name
   </label>
-                    <input class="govuk-input" id="first-name" name="first-name" type="text" spellcheck="false" autocomplete="first-name" value="{{user.FirstName}}">
+                    <input class="govuk-input" id="firstName" name="firstName" type="text" spellcheck="false" autocomplete="firstName" value="{{user.FirstName}}">
                 </div>
 
-                                <div class="govuk-form-group">
-                    <label class="govuk-label" for="last-name">
+                <div class="govuk-form-group">
+                    <label class="govuk-label" for="lastName">
     Last name
   </label>
-                    <input class="govuk-input" id="last-name" name="last-name" type="text" spellcheck="false" autocomplete="last-name"  value="{{user.LastName}}">
+                    <input class="govuk-input" id="lastName" name="lastName" type="text" spellcheck="false" autocomplete="lastName"  value="{{user.LastName}}">
                 </div>
 
-<div class="govuk-button-group">
-  <button class="govuk-button" data-module="govuk-button">
+                <div class="govuk-button-group">
+                    <button class="govuk-button" data-module="govuk-button">
     Save
   </button>
-  <a class="govuk-link" href="/profile">Cancel and return to profile</a>
-</div>
+                    <a class="govuk-link" href="/profile">Cancel and return to profile</a>
+                </div>
 
             </form>
 

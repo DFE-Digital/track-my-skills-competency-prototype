@@ -6,10 +6,142 @@
 {% block content %}
 
     <div class="govuk-grid-row">
-        <div class="govuk-grid-column-two-thirds">
-            <h1 class="govuk-heading-xl">My plan</h1>
-            
-      
+        <div class="govuk-grid-column-full">
+            <h1 class="govuk-heading-xl  govuk-!-margin-bottom-3">My plan</h1>
+
+            <div class="panel govuk-!-margin-bottom-9">
+                <div class="govuk-grid-row">
+                    <div class="govuk-grid-column-one-third">
+                        <span class="govuk-caption-s">Current role</span>
+                        <h3 class="govuk-heading-s govuk-!-margin-bottom-0">{{user.Role}}</h3>
+                    </div>
+                    <div class="govuk-grid-column-one-third">
+                        <span class="govuk-caption-s">Current grade</span>
+                        <h3 class="govuk-heading-s govuk-!-margin-bottom-0">{{user.Grade}}</h3>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="govuk-grid-column-full">
+
+            {% if userPlans %}
+
+                <h2 class="govuk-heading-l">Actions</h2>
+
+                {% for plan in userPlans %}
+
+                    {% set currentSkill = ""%}
+                    {% set expectedSkill = ""%}
+                    {% for userSkill in userSkills %}
+                        {% if userSkill.fields.SkillID === plan.fields.SkillID%}
+                            {% set currentSkill = userSkill.fields.CurrentLevel %}
+                            {% set expectedSkill = userSkill.fields.ExpectedLevel %}
+                        {% endif %}
+                    {% endfor %}
+                    {% set skill = ""%}
+                    {% for userSkill in framework %}
+                        {% if userSkill.fields.SkillID === plan.fields.SkillID%}
+                            {% set skill = userSkill.fields.Name %}
+                        {% endif %}
+                    {% endfor %}
+
+                    <div class="panel govuk-!-margin-bottom-3">
+
+                        <h2 class="govuk-heading-m">{{skill}}</h2>
+                        <div class="govuk-grid-row">
+                            <div class="govuk-grid-column-one-half">
+                                <span class="govuk-caption-s">Action</span>
+                                <p class="govuk-body">{{plan.fields.Plan}}</p>
+                            </div>
+                            <div class="govuk-grid-column-one-quarter">
+                                <span class="govuk-caption-s">Expected</span>
+                                <p class="govuk-body">
+                                    <strong class="{% if expectedSkill === 'Awareness'%}govuk-tag {% else%}govuk-tag govuk-tag--grey{% endif %}">A</strong>
+                                    <strong class="{% if expectedSkill === 'Working'%}govuk-tag {% else%}govuk-tag govuk-tag--grey{% endif %}">W</strong>
+                                    <strong class="{% if expectedSkill === 'Practitioner'%}govuk-tag {% else%}govuk-tag govuk-tag--grey{% endif %}">P</strong>
+                                    <strong class="{% if expectedSkill === 'Expert'%}govuk-tag {% else%}govuk-tag govuk-tag--grey{% endif %}">E</strong>
+                                </p>
+                            </div>
+                            <div class="govuk-grid-column-one-quarter">
+                                <span class="govuk-caption-s">Current</span>
+                                <p class="govuk-body">
+                                    <strong class="{% if currentSkill === 'Awareness'%}govuk-tag {% else%}govuk-tag govuk-tag--grey{% endif %}">A</strong>
+                                    <strong class="{% if currentSkill === 'Working'%}govuk-tag {% else%}govuk-tag govuk-tag--grey{% endif %}">W</strong>
+                                    <strong class="{% if currentSkill === 'Practitioner'%}govuk-tag {% else%}govuk-tag govuk-tag--grey{% endif %}">P</strong>
+                                    <strong class="{% if currentSkill === 'Expert'%}govuk-tag {% else%}govuk-tag govuk-tag--grey{% endif %}">E</strong>
+                                </p>
+                            </div>
+                        </div>
+                        <div class="panel panel-white">
+                            <details class="govuk-details govuk-!-margin-bottom-0" data-module="govuk-details">
+                                <summary class="govuk-details__summary">
+                                    <span class="govuk-details__summary-text">
+      Progress updates ({{plan.fields.PlanActions|length}})
+    </span>
+                                </summary>
+                                <div class="govuk-details__text">
+
+                                    {% if plan.fields.PlanActions %}
+
+                                        <table class="govuk-table">
+                                            <caption class="govuk-table__caption govuk-table__caption--m">Updates</caption>
+                                            <thead class="govuk-table__head">
+                                                <tr class="govuk-table__row">
+                                                    <th scope="col" class="govuk-table__header govuk-!-width-two-thirds">Update</th>
+                                                    <th scope="col" class="govuk-table__header">Date</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody class="govuk-table__body">
+
+                                                {% for action in plan.fields.PlanActions %}
+                                                    {% for planAction in actions %}
+                                                        {% if planAction.id == action %}
+
+                                                            <tr class="govuk-table__row">
+                                                                <td class="govuk-table__cell ">{{planAction.fields.Action }}</td>
+                                                                <td class="govuk-table__cell">{{planAction.fields.Created | date('D MMM YYYY HH:mm')}}</td>
+                                                            </tr>
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+
+                                    {% else %}
+
+                                        <P>No updates have been added.</p>
+
+                                    {% endif %}
+                                    <form action="/plan/add-update" method="post">
+                                        <input type="hidden" name="planid" value="{{plan.id}}">
+                                        <div class="govuk-form-group">
+                                            <label class="govuk-label" for="actionupdate-{{loop.index}}">
+    Add an update
+  </label>
+                                            <textarea class="govuk-textarea" id="actionupdate-{{loop.index}}" name="actionupdate" rows="5"></textarea>
+                                        </div>
+
+                                        <button class="govuk-button" data-module="govuk-button">
+  Save update
+</button>
+                                    </form>
+                                </div>
+                            </details>
+                        </div>
+                    </div>
+                {% endfor %}
+
+                {% else%}
+
+                <p>You have no plans or actions.</p>
+
+                <p>You can add items to your plan from <a href="/skills" class="govuk-link">your skills review</a>.</p>
+
+            {% endif %}
+
+        </div>
 
     </div>
 

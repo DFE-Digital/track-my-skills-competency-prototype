@@ -3,73 +3,92 @@
 {% set selectedNav = "My skills" %}
 {% set pageName = "My skills" %}
 
-{% block hero%}
-    <div class="masthead">
-        <div class="dfe-width-container">
+{% block content %}
 
-            <h1 class="govuk-heading-xl govuk-!-margin-top-3 govuk-!-margin-bottom-3 govuk-!-font-size-36 ">
-                My skills
-            </h1>
-            <p class="govuk-body govuk-body-l">
-                <strong>Current role</strong>
-                {{user.Role}} - {{user.Grade}}</p>
+    <h1 class="govuk-heading-xl govuk-!-margin-bottom-3">My skills</h1>
+
+    <div class="panel govuk-!-margin-bottom-9">
+        <div class="govuk-grid-row">
+            <div class="govuk-grid-column-one-third">
+                <span class="govuk-caption-s">Current role</span>
+                <h3 class="govuk-heading-s govuk-!-margin-bottom-0">{{user.Role}}</h3>
+            </div>
+            <div class="govuk-grid-column-one-third">
+                <span class="govuk-caption-s">Current grade</span>
+                <h3 class="govuk-heading-s govuk-!-margin-bottom-0">{{user.Grade}}</h3>
+            </div>
         </div>
     </div>
 
-    {% endblock%}
+    <div class="govuk-grid-row">
+        <div class="govuk-grid-column-full">
 
-    {% block content %}
-
-        <div class="govuk-grid-row">
-            <div class="govuk-grid-column-full">
-
-                <table class="govuk-table">
-                    <thead class="govuk-table__head">
+            <table class="govuk-table">
+                                    <caption class="govuk-table__caption govuk-table__caption--m">DDaT Skills and Capability Framework</caption>
+                <thead class="govuk-table__head">
+                    <tr class="govuk-table__row">
+                        <th scope="col" class="govuk-table__header  govuk-!-width-one-half">Skill</th>
+                        <th scope="col" class="govuk-table__header">Expected</th>
+                        <th scope="col" class="govuk-table__header">Current</th>
+                        <th scope="col" class="govuk-table__header">Plan</th>
+                    </tr>
+                </thead>
+                <tbody class="govuk-table__body">
+                    {% for role in framework %}
                         <tr class="govuk-table__row">
-                            <th scope="col" class="govuk-table__header  govuk-!-width-one-half">Skill</th>
-                            <th scope="col" class="govuk-table__header">Expected</th>
-                            <th scope="col" class="govuk-table__header">Current</th>
-                        </tr>
-                    </thead>
-                    <tbody class="govuk-table__body">
-                        {% for role in framework %}
-                            <tr class="govuk-table__row">
-                                <th scope="row" class="govuk-table__header">{{ role.fields.Name }}</th>
-                                <td class="govuk-table__cell">
-                                    <strong class="{% if role.fields.Display === 'Awareness'%}govuk-tag {% else%}govuk-tag govuk-tag--grey{% endif %}">A</strong>
-                                    <strong class="{% if role.fields.Display === 'Working'%}govuk-tag {% else%}govuk-tag govuk-tag--grey{% endif %}">W</strong>
-                                    <strong class="{% if role.fields.Display === 'Practitioner'%}govuk-tag {% else%}govuk-tag govuk-tag--grey{% endif %}">P</strong>
-                                    <strong class="{% if role.fields.Display === 'Expert'%}govuk-tag {% else%}govuk-tag govuk-tag--grey{% endif %}">E</strong>
-                                </td>
-                                <td class="govuk-table__cell">
-                                    {% set levelAdded = false %}
-                                    {% for skill in userSkill %}
-                                        {% if skill.fields.SkillID == role.fields.SkillID %}
-                                            {% if not levelAdded %}
-                                                <strong class="{% if skill.fields.CurrentLevel === 'Awareness'%}govuk-tag {% else%}govuk-tag govuk-tag--grey{% endif %}">A</strong>
-                                                <strong class="{% if skill.fields.CurrentLevel === 'Working'%}govuk-tag {% else%}govuk-tag govuk-tag--grey{% endif %}">W</strong>
-                                                <strong class="{% if skill.fields.CurrentLevel === 'Practitioner'%}govuk-tag {% else%}govuk-tag govuk-tag--grey{% endif %}">P</strong>
-                                                <strong class="{% if skill.fields.CurrentLevel === 'Expert'%}govuk-tag {% else%}govuk-tag govuk-tag--grey{% endif %}">E</strong>
-                                                {% set levelAdded = true %}
-                                            {% endif %}
-
+                            <th scope="row" class="govuk-table__header">
+                                <a href="/skills/{{role.fields.SkillID}}" class="govuk-link">{{ role.fields.Name }}</a>
+                            </th>
+                            <td class="govuk-table__cell">
+                                <strong class="{% if role.fields.Display === 'Awareness'%}govuk-tag {% else%}govuk-tag govuk-tag--grey{% endif %}">A</strong>
+                                <strong class="{% if role.fields.Display === 'Working'%}govuk-tag {% else%}govuk-tag govuk-tag--grey{% endif %}">W</strong>
+                                <strong class="{% if role.fields.Display === 'Practitioner'%}govuk-tag {% else%}govuk-tag govuk-tag--grey{% endif %}">P</strong>
+                                <strong class="{% if role.fields.Display === 'Expert'%}govuk-tag {% else%}govuk-tag govuk-tag--grey{% endif %}">E</strong>
+                            </td>
+                            <td class="govuk-table__cell">
+                                {% set levelAdded = false %}
+                                {% for skill in userSkill %}
+                                    {% if skill.fields.SkillID == role.fields.SkillID %}
+                                        {% if not levelAdded %}
+                                            <strong class="{% if skill.fields.CurrentLevel === 'Awareness'%}govuk-tag {% else%}govuk-tag govuk-tag--grey{% endif %}">A</strong>
+                                            <strong class="{% if skill.fields.CurrentLevel === 'Working'%}govuk-tag {% else%}govuk-tag govuk-tag--grey{% endif %}">W</strong>
+                                            <strong class="{% if skill.fields.CurrentLevel === 'Practitioner'%}govuk-tag {% else%}govuk-tag govuk-tag--grey{% endif %}">P</strong>
+                                            <strong class="{% if skill.fields.CurrentLevel === 'Expert'%}govuk-tag {% else%}govuk-tag govuk-tag--grey{% endif %}">E</strong>
+                                            {% set levelAdded = true %}
                                         {% endif %}
 
-                                    {% endfor %}
-                                    {% if levelAdded == false %}
-                                        <strong class="{% if skill.fields.CurrentLevel === 'Awareness'%}govuk-tag {% else%}govuk-tag govuk-tag--grey{% endif %}">A</strong>  
-            <strong class="{% if skill.fields.CurrentLevel === 'Working'%}govuk-tag {% else%}govuk-tag govuk-tag--grey{% endif %}">W</strong>  
-            <strong class="{% if skill.fields.CurrentLevel === 'Practitioner'%}govuk-tag {% else%}govuk-tag govuk-tag--grey{% endif %}">P</strong>  
-            <strong class="{% if skill.fields.CurrentLevel === 'Expert'%}govuk-tag {% else%}govuk-tag govuk-tag--grey{% endif %}">E</strong>
                                     {% endif %}
-                                </td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
 
+                                {% endfor %}
+                                {% if levelAdded == false %}
+                                    <strong class="{% if skill.fields.CurrentLevel === 'Awareness'%}govuk-tag {% else%}govuk-tag govuk-tag--grey{% endif %}">A</strong>
+                                    <strong class="{% if skill.fields.CurrentLevel === 'Working'%}govuk-tag {% else%}govuk-tag govuk-tag--grey{% endif %}">W</strong>
+                                    <strong class="{% if skill.fields.CurrentLevel === 'Practitioner'%}govuk-tag {% else%}govuk-tag govuk-tag--grey{% endif %}">P</strong>
+                                    <strong class="{% if skill.fields.CurrentLevel === 'Expert'%}govuk-tag {% else%}govuk-tag govuk-tag--grey{% endif %}">E</strong>
+                                {% endif %}
+                            </td>
+                            <td class="govuk-table__cell">
+                                {% set hasPlan = 'false' %}
+                                {% for plan in userPlans%}
+
+                                    {% if plan.fields.SkillID == role.fields.SkillID %}
+                                        {% set hasPlan = 'true' %}
+                                    {% endif %}
+
+                                {% endfor %}
+                                {% if hasPlan === 'true' %}
+                                    <a href="/plan" class="govuk-link">View plan</a>
+                                    {% else%}
+                                No plan
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
+
     </div>
+</div>
 
 {% endblock %}

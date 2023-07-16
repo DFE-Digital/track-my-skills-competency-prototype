@@ -1,0 +1,22 @@
+{% extends "layouts/homepage.html" %}
+
+{% set selectedNav = "Home" %}
+{% set pageName = "Invalid link" %}
+
+{% block content %}
+
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+      <h1 class="govuk-heading-xl">Cannot sign you in</h1>
+    </div>
+    <div class="govuk-grid-column-two-thirds">
+      <p class="govuk-body">The link you've clicked on has expired or isn't valid for other reasons.</p>
+
+      <p  class="govuk-body">Try <a href="/sign-in">signing in again</a>.</p>
+
+    <p class="govuk-body">If you're still having problems, <a href="https://design.education.gov.uk/design-ops/contact" target="_blank" class="govuk-link" rel="noopener noreferrer">contact Design Ops</a>.</p>
+
+  </div>
+   </div>
+
+{% endblock %}

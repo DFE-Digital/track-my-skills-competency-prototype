@@ -1,0 +1,75 @@
+{% extends "layouts/auth.html" %}
+
+{% set selectedNav = "Overview" %}
+{% set pageName = "Overview" %}
+
+{% block content %}
+
+    <div class="govuk-grid-row">
+ <div class="govuk-grid-column-two-thirds">  <h1 class="govuk-heading-xl">Overview</h1>
+
+            {% if not user.Grade or not user.Role or user.Name === " " %}
+                <div class="govuk-notification-banner" role="region"
+  aria-labelledby="govuk-notification-banner-title"
+  data-module="govuk-notification-banner">
+                    <div class="govuk-notification-banner__header">
+                        <h2 class="govuk-notification-banner__title" id="govuk-notification-banner-title">
+      Important
+    </h2>
+                    </div>
+                    <div class="govuk-notification-banner__content">
+                        <p class="govuk-notification-banner__heading">
+    Set your <a href="/profile" class="govuk-notification-banner__link">role and grade before using this service.</a>
+
+                        </p>
+                    </div>
+                </div>
+            {% endif %}
+    </div>
+
+        <div class="govuk-grid-column-two-thirds">
+          
+            <p class="govuk-body">This is a prototype, it's a bit rough around the edges, but functionally, it works.</p>
+
+            <p class="govuk-body">Some caveats:</p>
+
+            <ul class="govuk-list govuk-list--bullet">
+                <li>the skills and competencies are exactly as they are in the DDaT framework</li>
+                <li>the skills and competencies are not tailored to DfE</li>
+                <li>this service won't show what to do to improve skill gaps (see future)</li>
+                <li>you can't edit or delete any updates or comments (yet - see future)</li>
+            </ul>
+
+            <p class="govuk-body">What you can do:</p>
+
+            <ul class="govuk-list govuk-list--bullet">
+                <li>see the skills and competencies for your role and grade</li>
+                <li>save how you feel you meet the skills</li>
+                <li>see what skills and competencies are for the next grade in your profession</li>
+                <li>add actions to a plan to track progress on developing any skills</li>
+            </ul>
+
+            <p class="govuk-body">Future:</p>
+
+            <ul class="govuk-list govuk-list--bullet">
+                <li>edit and close actions and update comments</li>
+                <li>add other skills outside skills and capability framework</li>
+                <li>compare against others in the same profession anonymously</li>
+                <li>share your results and plan with your line manager or a profession manager</li>
+                <li>reminders for completing and updating actions</li>
+                <li>training plans for skills gaps</li>
+                <li>make it work on Azure Active Directory so no need for magic links</li>
+            </ul>
+
+            <h2 class="govuk-heading-m">Feedback and ideas</h2>
+            <p class="govuk-body">If you have any feedback about this prototype or any ideas for making it better, <a href="https://design.education.gov.uk/design-ops/contact" target="_blank" rel="noopener noreferrer">contact Design Ops</a>.</p>
+
+        </div>
+
+
+    <div class="govuk-grid-column-one-third">
+        <p>Go to <a href="/skills">your skills overview</a></p>
+    </div>
+</div>
+
+{% endblock %}

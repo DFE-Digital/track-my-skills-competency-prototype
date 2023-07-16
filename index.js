@@ -128,7 +128,7 @@ app.get('/signin/:id', async (req, res) => {
 
   if (records.length === 0 || new Date(records[0].get('ExpiryDate')) < new Date()) {
     // Token is invalid or expired
-    res.send('Sorry, you can\'t sign in.');
+    res.render('invalid-link')
   } else {
     req.session.email = records[0].get('Email');
     req.session.token = records[0].get('Token');
@@ -142,22 +142,26 @@ app.get('/signin/:id', async (req, res) => {
     req.session.token = sessionId;
 
     // Delete the token
-    await expirePreviousTokens(records[0].get('Email'))    
-    
-    res.redirect('/dashboard');
+    await expirePreviousTokens(records[0].get('Email'))
+
+    res.redirect('/overview');
   }
 });
 
-app.get('/dashboard', authenticate, (req, res) => {
-  res.render('auth-views/dashboard/index');
+app.get('/overview', authenticate, async (req, res) => {
+
+  const user = await getUserData(req.session.email !== undefined || process.env.email);
+
+  res.render('auth-views/overview/index', { user });
 });
 
 app.get('/skills', authenticate, async (req, res) => {
   const user = await getUserData(req.session.email !== undefined || process.env.email);
 
   const framework = await getRoleSkillsView(user.Role + " " + user.Grade);
-  const userSkill = await getUserSkillsAll(user.Email );
-  res.render('auth-views/skills/overview', {user, framework, userSkill});
+  const userSkill = await getUserSkillsAll(user.Email);
+  const userPlans = await getUserPlans(user.Email);
+  res.render('auth-views/skills/overview', { user, framework, userSkill, userPlans });
 });
 
 app.get('/skills/:id', authenticate, async (req, res) => {
@@ -190,49 +194,138 @@ app.get('/skills/:id', authenticate, async (req, res) => {
   const framework = await getRoleSkillsView(user.Role + " " + user.Grade);
   const roleSkill = await getRoleSkillBySkillIDX(skillID);
   const nextFramework = await getRoleSkillsView(user.Role + " " + nextGrade);
-  const userSkill = await getUserSkills(user.Email, skillID );
+  const userSkill = await getUserSkills(user.Email, skillID);
 
-  const plan = await getPlans(user.Email, skillID );
+  const plan = await getPlans(user.Email, skillID);
 
-  res.render('auth-views/skills/index', {user, framework, nextFramework, nextGrade, userSkill, plan, roleSkill});
+  res.render('auth-views/skills/index', { user, framework, nextFramework, nextGrade, userSkill, plan, roleSkill });
 });
 
-app.get('/plan', authenticate, (req, res) => {
-  res.render('auth-views/plan/index');
+app.get('/plan', authenticate, async (req, res) => {
+
+  const user = await getUserData(req.session.email !== undefined || process.env.email);
+  const framework = await getRoleSkillsView(user.Role + " " + user.Grade);
+  const userPlans = await getUserPlan(user.Email);
+  const userSkills = await getUserSkillsAll(user.Email);
+const actions = await getUserPlanActions(user.Email);
+
+  res.render('auth-views/plan/index',{user, framework, userPlans, userSkills, actions});
 });
 
 app.get('/profile', authenticate, async (req, res) => {
   const user = await getUserData(req.session.email !== undefined || process.env.email);
-  res.render('auth-views/profile/index', {user});
+  res.render('auth-views/profile/index', { user });
 });
 
 app.get('/profile/name', authenticate, async (req, res) => {
   const user = await getUserData(req.session.email !== undefined || process.env.email);
-  res.render('auth-views/profile/name', {user});
+  var updated = req.query.u;
+  res.render('auth-views/profile/name', { user, updated });
 });
 
 app.get('/profile/grade', authenticate, async (req, res) => {
   const user = await getUserData(req.session.email !== undefined || process.env.email);
-  res.render('auth-views/profile/grade', {user});
+  var updated = req.query.u;
+  res.render('auth-views/profile/grade', { user, updated });
 });
 
 app.get('/profile/role', authenticate, async (req, res) => {
   const user = await getUserData(req.session.email !== undefined || process.env.email);
-  res.render('auth-views/profile/role', {user});
+  var updated = req.query.u;
+  res.render('auth-views/profile/role', { user, updated });
 });
+
+app.post('/profile/name', authenticate, async (req, res) => {
+  const user = await getAllUserData(req.session.email !== undefined || process.env.email);
+  updateUserName(user.id, req.body.firstName, req.body.LastName)
+  await wait(500);
+  res.redirect('/profile/name?u=1');
+});
+
+app.post('/profile/grade', authenticate, async (req, res) => {
+  const user = await getAllUserData(req.session.email !== undefined || process.env.email);
+  updateGrade(user.id, req.body.grade)
+  await wait(500);
+  res.redirect('/profile/grade?u=1');
+});
+
+app.post('/profile/role', authenticate, async (req, res) => {
+  const user = await getAllUserData(req.session.email !== undefined || process.env.email);
+  updateRole(user.id, req.body.role)
+  await wait(500);
+  res.redirect('/profile/role?u=1');
+});
+
+app.post('/plan/add-update', authenticate, async (req, res) => {
+  const user = await getAllUserData(req.session.email !== undefined || process.env.email);
+  const update = req.body.actionupdate;
+  const planID = req.body.planid;
+
+  addPlanAction(update, planID)
+  await wait(500);
+  res.redirect('/plan');
+});
+
+
+async function updateUserName(userId, firstName, lastName) {
+  try {
+    const updatedRecord = await base('Users').update(userId, {
+      FirstName: firstName,
+      LastName: lastName
+    });
+
+    // Process the updated record as needed
+    return updatedRecord;
+  } catch (error) {
+    // Handle error
+    console.error('Error updating user name in Airtable:', error);
+    throw error;
+  }
+}
+
+async function updateGrade(userId, grade) {
+  try {
+    const updatedRecord = await base('Users').update(userId, {
+      Grade: grade
+    });
+
+    // Process the updated record as needed
+    return updatedRecord;
+  } catch (error) {
+    // Handle error
+    console.error('Error updating user name in Airtable:', error);
+    throw error;
+  }
+}
+
+async function updateRole(userId, role) {
+  try {
+    const updatedRecord = await base('Users').update(userId, {
+      Role: role
+    });
+
+    // Process the updated record as needed
+    return updatedRecord;
+  } catch (error) {
+    // Handle error
+    console.error('Error updating user name in Airtable:', error);
+    throw error;
+  }
+}
+
 
 app.post('/save-current', authenticate, async (req, res) => {
   const user = await getUserData(req.session.email !== undefined || process.env.email);
   const framework = await getRoleSkillBySkillID(req.body.skillid);
-  addUserSkill(process.env.email,  framework[0].fields.Display, req.body.currentlevel, req.body.comments, parseInt(req.body.skillid))
+  addUserSkill(process.env.email, framework[0].fields.Display, req.body.currentlevel, req.body.comments, parseInt(req.body.skillid))
   res.redirect('/skills/' + req.body.skillid);
 });
 
 app.post('/add-plan', authenticate, async (req, res) => {
   const user = await getUserData(req.session.email !== undefined || process.env.email);
-  const framework = await getRoleSkillBySkillID(req.body.skillid);
+  const framework = await getRoleSkillBySkillID(req.body.actionskillid);
   addUserPlan(process.env.email, req.body.action, parseInt(req.body.actionskillid))
-  res.redirect('/skills/' + req.body.skillid);
+  res.redirect('/skills/' + req.body.actionskillid);
 });
 
 async function getRoleSkillBySkillID(skillID) {
@@ -275,8 +368,51 @@ async function getRoleSkillBySkillIDX(skillID) {
   }
 }
 
+async function getUserPlan(email) {
+  try {
+    const records = await base('Plans')
+      .select({
+        filterByFormula: `{Email} = '${email}'`,
+      sort: [{ field: 'SkillID', direction: 'asc' }]
+      })
+      .all();
 
+    if (records.length > 0) {
+      const r = records;
+      // Process the userSkill record as needed
+      return r;
+    } else {
+      return null; // No matching record found
+    }
+  } catch (error) {
+    // Handle error
+    console.error('Error retrieving user skill from Airtable:', error);
+    throw error;
+  }
+}
 
+async function getUserPlanActions(email) {
+  try {
+    const records = await base('PlanActions')
+      .select({
+        filterByFormula: `{Plans} = '${email}'`,
+      sort: [{ field: 'Created', direction: 'desc' }]
+      })
+      .all();
+
+    if (records.length > 0) {
+      const r = records;
+      // Process the userSkill record as needed
+      return r;
+    } else {
+      return null; // No matching record found
+    }
+  } catch (error) {
+    // Handle error
+    console.error('Error retrieving user skill from Airtable:', error);
+    throw error;
+  }
+}
 
 async function getRoleSkillsView(viewName) {
   try {
@@ -399,6 +535,22 @@ async function addUserSkill(email, expectedLevel, currentLevel, comments, skillI
   }
 }
 
+async function addPlanAction(action, planID) {
+  try {
+    const newRecord = await base('PlanActions').create({
+      Action: action,
+      Plans: [planID]
+    });
+
+    // Process the new record as needed
+    return newRecord;
+  } catch (error) {
+    // Handle error
+    console.error('Error adding user plan to Airtable:', error);
+    throw error;
+  }
+}
+
 async function addUserPlan(email, plan, skillID) {
   try {
     const newRecord = await base('Plans').create({
@@ -453,6 +605,27 @@ function sendMagicLinkEmail(token) {
     })
     .then((response) => { return true })
     .catch((err) => console.log(err))
+}
+
+async function getAllUserData(email) {
+  try {
+    const records = await base('Users').select({
+      filterByFormula: `{Email} = '${email}'`,
+      maxRecords: 1
+    }).firstPage();
+
+    if (records.length === 1) {
+      const userData = records[0]
+      return userData;
+    } else {
+      // User not found
+      return null;
+    }
+  } catch (error) {
+    // Handle error
+    console.error('Error retrieving user data:', error);
+    throw error;
+  }
 }
 
 async function getUserData(email) {
@@ -535,6 +708,32 @@ async function getPlans(email, skillID) {
 }
 
 
+async function getUserPlans(email) {
+  try {
+    const records = await base('Plans').select({
+      filterByFormula: `{Email} = '${email}'`,
+      sort: [{ field: 'Created', direction: 'desc' }]
+    }).firstPage();
+
+    if (records.length > 0) {
+      return records;
+    } else {
+      return null; // No matching records found
+    }
+  } catch (error) {
+    // Handle error
+    console.error('Error retrieving user skills:', error);
+    throw error;
+  }
+}
+
+function wait(waitTime) {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve(true)
+    }, waitTime)
+  })
+}
 
 
 // Start the server
