@@ -73,10 +73,23 @@ app.use((req, res, next) => {
 app.post('/submit', express.urlencoded({ extended: false }), async (req, res) => {
   const email = req.body.email;
 
+
+ if (!email.endsWith('education.gov.uk')) {
+    // Email doesn't match the required domain, don't do anything
+    return res.redirect('/invalid-email/index')
+  }
+
+try {
   // Check if the email exists in Airtable
-  const records = await base('Users').select({
+  var records = []
+  try {
+      records = await base('Users').select({
     filterByFormula: `{Email} = '${email}'`
   }).firstPage();
+  } catch (error) {
+    console.log(error)
+  }
+
 
   if (records.length === 0) {
     // Email doesn't exist, create a new entry and generate a token
@@ -86,7 +99,7 @@ app.post('/submit', express.urlencoded({ extended: false }), async (req, res) =>
     // Expire previous tokens for the email address
     await expirePreviousTokens(email);
 
-    await base('Users').create({ Name: '', Email: email });
+    await base('Users').create({ Email: email });
 
 
     // Create a new entry in the Tokens table
@@ -94,7 +107,7 @@ app.post('/submit', express.urlencoded({ extended: false }), async (req, res) =>
 
 
     // Send the magic link email
-    await sendMagicLinkEmail(token);
+    await sendMagicLinkEmail(token, email);
 
     res.redirect('/check-email/index')
   } else {
@@ -109,10 +122,13 @@ app.post('/submit', express.urlencoded({ extended: false }), async (req, res) =>
     await base('Tokens').create({ Email: email, Token: token, ExpiryDate: expiryDate });
 
     // Send the magic link email
-    await sendMagicLinkEmail(token);
+    await sendMagicLinkEmail(token, email);
 
     res.redirect('/check-email/index')
   }
+} catch (error) {
+  console.log(error)
+}
 });
 
 app.get('/signin/:id', async (req, res) => {
@@ -582,22 +598,26 @@ function getExpiryDate() {
 }
 
 async function expirePreviousTokens(email) {
-  const records = await base('Tokens').select({
-    filterByFormula: `{Email} = '${email}'`
-  }).firstPage();
-
-  const deletePromises = records.map(record => {
-    return base('Tokens').destroy(record.id);
-  });
-
-  return Promise.all(deletePromises);
+ try {
+   const records = await base('Tokens').select({
+     filterByFormula: `{Email} = '${email}'`
+   }).firstPage();
+ 
+   const deletePromises = records.map(record => {
+     return base('Tokens').destroy(record.id);
+   });
+ 
+   return Promise.all(deletePromises);
+ } catch (error) {
+  console.log(error)
+ }
 }
 
 
 // Utility function to send the magic link email
-function sendMagicLinkEmail(token) {
+function sendMagicLinkEmail(token, email) {
   notify
-    .sendEmail(process.env.magiclinkemailtemplateid, 'andy.jones@education.gov.uk', {
+    .sendEmail(process.env.magiclinkemailtemplateid, email, {
       personalisation: {
         token: token
       },
