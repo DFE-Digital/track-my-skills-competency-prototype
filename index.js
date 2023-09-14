@@ -74,7 +74,7 @@ app.post('/submit', express.urlencoded({ extended: false }), async (req, res) =>
   const email = req.body.email;
 
 
- if (!email.endsWith('education.gov.uk')) {
+ if (!email.endsWith('.gov.uk')) {
     // Email doesn't match the required domain, don't do anything
     return res.redirect('/invalid-email/index')
   }
